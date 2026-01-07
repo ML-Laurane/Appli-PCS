@@ -1,4 +1,3 @@
-com\imt\framework\web\tuto\JerseyConfig.class
 com\imt\framework\web\tuto\resources\LivreResource.class
 com\imt\framework\web\tuto\repositories\LivreRepository.class
 com\imt\framework\web\tuto\TutoApplication.class

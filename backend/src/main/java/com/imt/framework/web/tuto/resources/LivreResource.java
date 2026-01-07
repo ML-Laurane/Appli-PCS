@@ -3,63 +3,61 @@ package com.imt.framework.web.tuto.resources;
 import com.imt.framework.web.tuto.entities.Livre;
 import com.imt.framework.web.tuto.repositories.LivreRepository;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-@Path("/books")
+@RestController
+@RequestMapping("/books")
+@CrossOrigin(origins = "*")
 public class LivreResource {
 
-    @Autowired
-    private LivreRepository livreRepository;
+    private final LivreRepository livreRepository;
 
-    @GET
-    @Produces("application/json")
-    public Response getBooks(@QueryParam("maxPrice") final Double maxPrice){
-        if(maxPrice != null){
-            return Response.ok()
-            .entity(livreRepository.getBooksWithMaxPrice(maxPrice))
-            .header("Access-Control-Allow-Origin", "*")
-            .build();
-        }
-        return Response.ok()
-               .entity(livreRepository.findAll())
-               .header("Access-Control-Allow-Origin", "*")
-               .build();
+    public LivreResource(LivreRepository livreRepository) {
+        this.livreRepository = livreRepository;
     }
 
-    @POST
-    @Consumes("application/json")
-    public void createBook(@NotNull @RequestBody Livre livre){
+    // GET /books?maxPrice=...
+    @GetMapping
+    public Iterable<Livre> getBooks(
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice) {
+
+        if (maxPrice != null) {
+            return livreRepository.getBooksWithMaxPrice(maxPrice);
+        }
+        return livreRepository.findAll();
+    }
+
+    // POST /books
+    @PostMapping
+    public void createBook(@NotNull @RequestBody Livre livre) {
         livreRepository.save(livre);
     }
 
-    @PATCH
-    @Consumes
-    @Path("/{id}")
-    public void updateBook(@NotNull @PathParam("id") Integer id, @NotNull @RequestBody Livre livre) throws Exception {
+    // PATCH /books/{id}
+    @PatchMapping("/{id}")
+    public void updateBook(
+            @PathVariable Integer id,
+            @NotNull @RequestBody Livre livre) throws Exception {
+
         Optional<Livre> l = livreRepository.findById(id);
 
-        if(l.isEmpty()) {
+        if (l.isEmpty()) {
             throw new Exception("Livre inconnu");
         }
-        else {
-            Livre livreToUpdate = l.get();
-            livreToUpdate.setAuteur(livre.getAuteur());
-            livreToUpdate.setPrice(livre.getPrice());
-            livreToUpdate.setTitre(livre.getTitre());
 
-            livreRepository.save(livreToUpdate);
-        }
+        Livre livreToUpdate = l.get();
+        livreToUpdate.setAuteur(livre.getAuteur());
+        livreToUpdate.setPrice(livre.getPrice());
+        livreToUpdate.setTitre(livre.getTitre());
+
+        livreRepository.save(livreToUpdate);
     }
 
-    @DELETE
-    @Path("/{id}")
-    public void deleteBook(@NotNull @PathParam("id") final Integer id){
+    // DELETE /books/{id}
+    @DeleteMapping("/{id}")
+    public void deleteBook(@PathVariable Integer id) {
         livreRepository.deleteById(id);
     }
 }
