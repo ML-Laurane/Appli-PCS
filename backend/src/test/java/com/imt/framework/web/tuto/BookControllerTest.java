@@ -17,7 +17,7 @@ class BookControllerTest {
 
     @Test
     void shouldReturnBooksEndpoint() throws Exception {
-        mockMvc.perform(get("/book"))
+        mockMvc.perform(get("/books"))
                .andExpect(status().isOk());
     }
 }
